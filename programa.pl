@@ -10,8 +10,8 @@ odiariaQuedar(harry,slytherin).
 odiariaQuedar(draco,hufflepuff).
 
 % Modelando casas -> casa/2(NombreCasa,Interes)
-casa(gryffindor,coraje).
-casa(slytherin,orgullo).
+casa(gryffindor,corajudo).
+casa(slytherin,orgulloso).
 casa(slytherin,inteligente).
 casa(ravenclaw,inteligente).
 casa(ravenclaw,responsable).
@@ -24,6 +24,7 @@ permiteEntrar(slytherin,Mago):-
 
 permiteEntrar(Casa,Mago):-
     casa(Casa,_),
+    Casa \= slytherin,
     mago(Mago,_,_).
 
 % 2)
@@ -41,19 +42,29 @@ tieneCaracteristica(Mago,Caracteristica):-
 puedeQuedarEn(hermione,gryffindor).
 
 puedeQuedarEn(Mago,Casa):-
+    permiteEntrar(Casa,Mago),
     caracterApropiadoParaEntrar(Mago,Casa),
     not(odiariaQuedar(Mago,Casa)).
 
-%4)
+%4) -> Sacado de la resolucion de los profes
 cadenaDeAmistades(ListaMagos):-
-    casa(Casa,_),
-    findall(Mago,cadenaDeAmistad(Mago,Casa),ListaMagosFULL),
-    list_to_set(ListaMagosFULL,ListaMagos).
+    todosAmistosos(ListaMagos),
+    cadenaDeCasas(ListaMagos).
 
-cadenaDeAmistad(Mago,Casa):-
-    tieneCaracteristica(Mago,amistoso),
-    puedeQuedarEn(Mago,Casa).
+todosAmistosos(ListaMagos):-
+    forall(member(Mago,ListaMagos),
+        esAmistoso(Mago)).
 
+esAmistoso(Mago):-
+    tieneCaracteristica(Mago,amistoso).
+
+cadenaDeCasas([Mago1,Mago2 | MagosSiguientes]):- % -> Planteamos predicado con lista generica
+    puedeQuedarEn(Mago1,Casa),
+    puedeQuedarEn(Mago2,Casa),
+    cadenaDeCasas([Mago2 | MagosSiguientes]).
+
+cadenaDeCasas([_]). % -> Caso base en caso de que la lista sea un solo elem.
+cadenaDeCasas([]). % -> Caso base en caso de que la lista esta vacia.
 
 % PARTE 2 --------------------------------------
 % -> De los profesores, tomé el punto 1)a) y con esa base segui yo, ya que no utilice functores
