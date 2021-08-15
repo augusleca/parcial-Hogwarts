@@ -56,63 +56,172 @@ cadenaDeAmistad(Mago,Casa):-
 
 
 % PARTE 2 --------------------------------------
-
+% -> De los profesores, tomé el punto 1)a) y con esa base segui yo, ya que no utilice functores
 esDe(hermione,gryffindor).
 esDe(ron,gryffindor).
 esDe(harry,gryffindor).
 esDe(draco,slytherin).
 esDe(luna,ravenclaw).
+casa(Casa):- casa(Casa,_).
 
-accion(harry,andarFueraCama,-50).
-accion(hermione,tercerPiso,-75).
-accion(hermione,bibliotecaRes,-10).
-accion(harry,tercerPiso,-75).
-accion(harry,bosque,-50).
-accion(draco,mazmorras,0).
-accion(ron,ajedrez,+50).
-accion(hermione,salvarAmigos,+50).
-accion(harry,ganarAVoldemort,+60).
-accion(hermione,respondio(dondeSeEncuentraBezoar,20,snape),10).
-accion(hermione,respondio(comoLevitaUnaPluma,25,flitwick),25).
-%accion(_,respondio(_,Dificultad,snape),Puntaje):- Puntaje is Dificultad/2.
-%accion(_,respondio(_,Dificultad,_),Dificultad).
+accion(harry,anduvoFueraDeCama).
+accion(hermione,irA(tercerPiso)).
+accion(hermione,irA(bibliotecaRes)).
+accion(harry,irA(bosque)).
+accion(harry,irA(tercerPiso)).
+accion(draco,irA(mazmorras)).
+accion(ron,buenaAccion(50, ganarAjedrez)).
+accion(hermione,buenaAccion(50, salvarAmigos)).
+accion(harry,buenaAccion(60,vencerAVoldemort)).
+% Punto 4) -----------
+accion(hermione,respondio(dondeSeEncuentraBezoar,20,snape)).
+accion(hermione,respondio(comoLevitaUnaPluma,25,flitwick)).
+% -----------------
+hizoAlgunaAccion(Mago):- accion(Mago,_).
 
-%realizoAccion(Alumno,-50):-
-%    accion(Alumno,andarFueraCama)
+puntajePorAccion(anduvoFueraDeCama,-50).
+puntajePorAccion(irA(Lugar),Puntaje):- lugarProhibido(Lugar,Puntaje).
+puntajePorAccion(buenaAccion(Puntaje,_),Puntaje).
+% Punto 4) -----------
+puntajePorAccion(respondio(_,Dificultad,snape),Puntaje):- Puntaje is Dificultad/2.
+puntajePorAccion(respondio(_,Puntaje,Profesor),Puntaje):- Profesor \= snape.
+% -----------------
+
+lugarProhibido(bosque,-50).
+lugarProhibido(bibliotecaRes,-10).
+lugarProhibido(tercerPiso,-75).
 
 % 1)
 % a)
 buenAlumno(Mago):-
-    accion(Mago,_,_),
-    forall(accion(Mago,Accion,_),
-        buenaAccion(Accion)).
+    hizoAlgunaAccion(Mago),
+    not(hizoAlgoMalo(Mago)).
 
-buenaAccion(Accion):-
-    accion(_,Accion,PuntosVariados),
-    PuntosVariados >= 0.
+hizoAlgoMalo(Mago):-
+    accion(Mago,Accion),
+    puntajePorAccion(Accion,Puntaje),
+    Puntaje < 0.
 
 % b)
 accionRecurrente(Accion):-
-    accion(UnMago,Accion,_),
-    accion(OtroMago,Accion,_),
-    UnMago \= OtroMago.
+    accion(Mago,Accion),
+    accion(OtroMago,Accion),
+    Mago \= OtroMago.
 
 % 2)
 puntajeTotalCasa(Casa,PuntajeTotal):-
-    casa(Casa,_),
-    findall(Puntaje,puntajeSingular(Casa,Puntaje),ListaPuntajes),
-    sumlist(ListaPuntajes, PuntajeTotal).
+    casa(Casa),
+    findall(Puntaje,puntajePorAccionDeCasa(Casa,Puntaje),Puntajes),
+    sumlist(Puntajes, PuntajeTotal).
 
-puntajeSingular(Casa,Puntaje):-
+puntajePorAccionDeCasa(Casa,Puntaje):-
     esDe(Mago,Casa),
-    accion(Mago,_,Puntaje).
+    accion(Mago,Accion),
+    puntajePorAccion(Accion,Puntaje).
 
 % 3)
 casaGanadora(Casa):-
-    casa(Casa,_),
-    puntajeTotalCasa(Casa,PuntajeCasa),
-    forall(puntajeTotalCasa(_,PuntajeOtraCasa),
-        PuntajeCasa >= PuntajeOtraCasa).
+    puntajeTotalCasa(Casa,PuntajeTotal),
+    forall(puntajeTotalCasa(_,OtroPuntajeTotal),
+            PuntajeTotal >= OtroPuntajeTotal).
+
+% 4) -> Modificamos la parte de accion! (1-a)
+
+
+
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+% V2 -> De tito
+%accion(harry,andarFueraCama).
+%accion(hermione,tercerPiso).
+%accion(hermione,bibliotecaRes).
+%accion(harry,tercerPiso).
+%accion(harry,bosque).
+%accion(draco,mazmorras).
+%accion(ron,ajedrez).
+%accion(hermione,salvarAmigos).
+%accion(harry,ganarAVoldemort).
+%accion(hermione,respondio(dondeSeEncuentraBezoar,20,snape)).
+%accion(hermione,respondio(comoLevitaUnaPluma,25,flitwick)).
+
+
+% puntosAccion/2(Alumno,Puntaje).
+%puntosAccion(andarFueraCama,-50):- accion(_,andarFueraCama).
+%puntosAccion(bosque,-50):- accion(_,bosque).
+%puntosAccion(tercerPiso,-75):- accion(_,tercerPiso).
+%puntosAccion(bibliotecaRes,-10):- accion(_,bibliotecaRes).
+%puntosAccion(mazmorras,0):- accion(_,mazmorras).
+%puntosAccion(ajedrez,+50).
+%puntosAccion(salvarAmigos,+50).
+%puntosAccion(vencerAVoldemort,+60).
+
+
+% 1)
+% a)
+%buenAlumno(Mago):-
+%    puntosAccion(Mago,_,_),
+%    forall(accion(Mago,Accion),
+%        buenaAccion(Accion)).
+
+%buenaAccion(Accion):-
+%    puntosAccion(Accion,PuntosVariados),
+%    PuntosVariados >= 0.
+
+% b)
+%accionRecurrente(Accion):-
+%    accion(UnMago,Accion),
+%    accion(OtroMago,Accion),
+%    UnMago \= OtroMago.
+
+% 2)
+%puntajeTotalCasa(Casa,PuntajeTotal):-
+%    casa(Casa,_),
+%    findall(Puntaje,puntajeSingular(Casa,Puntaje),ListaPuntajes),
+%    sumlist(ListaPuntajes, PuntajeTotal).
+
+%puntajeSingular(Casa,Puntaje):-
+%    esDe(Mago,Casa),
+%    puntosAccion(Mago,_,Puntaje).
+
+% 3)
+%casaGanadora(Casa):-
+%    casa(Casa,_),
+%    puntajeTotalCasa(Casa,PuntajeCasa),
+%    forall(puntajeTotalCasa(_,PuntajeOtraCasa),
+%        PuntajeCasa >= PuntajeOtraCasa).
 
 % 4) -> Dentro del predicado "accion" una de las posibles acciones 
 %       nuevas es responder, la cual es un functor de la forma;
